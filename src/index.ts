@@ -14,27 +14,51 @@ app.get("/:formId/filteredResponses", async (req: Request, res: Response) => {
     const formId = req.params.formId;
     const query = req.query;
 
-    const limit = query.limit ? !isNaN(parseInt(query.limit + '')) ? parseInt(query.limit + '') : 10 : 10;
-    const offset = query.offset ? !isNaN(parseInt(query.offset + '')) ? parseInt(query.offset + '') : 0 : 0;
+    const limit: number = query.limit ? !isNaN(parseInt(query.limit + '')) ? parseInt(query.limit + '') : 150 : 150;
+    const offset: number = query.offset ? !isNaN(parseInt(query.offset + '')) ? parseInt(query.offset + '') : 0 : 0;
+
+    const status = query.status;
+    const sort = query.sort;
+    const afterDate = query.afterDate;
+    const beforeDate = query.beforeDate;
+
+    const filters: ResponseFiltersType = query.filters ? JSON.parse(JSON.stringify(query.filters)) : [];
 
     try {
         if (!formId) {
             return res.status(400).send('Unable to get filtered responses for this form')
         }
 
-        const filters: ResponseFiltersType = [
-            { id: "4KC356y4M6W8jHPKx9QfEy", condition: "equals", value: "Nothing much to share yet!" },
-            { id: "bE2Bo4cGUv49cjnqZ4UnkW", condition: "equals", value: "Johnny" },
-        ]
-
         const url = `${getFillOutUrl()}/api/forms/${formId}/submissions`
 
         console.log('Getting filtered responses for form ', url);
 
+        const params: Record<string, any> = {
+            limit,
+            offset
+        }
+
+        if (afterDate) {
+            params.afterDate = afterDate
+        }
+
+        if (beforeDate) {
+            params.beforeDate = beforeDate
+        }
+
+        if (status) {
+            params.status = status
+        }
+
+        if (sort) {
+            params.sort = sort
+        }
+
         const response = await axios.get<FillOutFormSubmissionResponsesData>(url, {
             headers: {
                 'Authorization': `Bearer ${process.env.FILL_OUT_API_KEY}`
-            }
+            },
+            params
         });
 
         const data = response.data;
@@ -108,6 +132,7 @@ app.get("/:formId/filteredResponses", async (req: Request, res: Response) => {
             pageCount: Math.ceil(filteredResponses.length / limit)
         });
     } catch (error) {
+        console.error(error)
         console.table({ message: 'Unable to get filtered responses for a form ', formId, error })
         res.status(400).send('Unable to get filtered responses for this form')
     }
