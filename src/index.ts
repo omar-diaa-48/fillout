@@ -1,7 +1,7 @@
 import axios from "axios";
 import dotenv from "dotenv";
 import express, { Express, Request, Response } from "express";
-import { FillOutFormSubmissionResponsesData } from "./interfaces";
+import { FillOutFormSubmissionResponse, FillOutFormSubmissionResponsesData, ResponseFiltersType } from "./interfaces";
 import { getFillOutUrl } from "./utilities";
 
 dotenv.config();
@@ -16,6 +16,11 @@ app.get("/:formId/filteredResponses", async (req: Request, res: Response) => {
             return res.status(400).send('Unable to get filtered responses for this form')
         }
 
+        const filters: ResponseFiltersType = [
+            { id: "4KC356y4M6W8jHPKx9QfEy", condition: "equals", value: "Nothing much to share yet!" },
+            { id: "bE2Bo4cGUv49cjnqZ4UnkW", condition: "equals", value: "Johnny" },
+        ]
+
         const url = `${getFillOutUrl()}/api/forms/${formId}/submissions`
 
         console.log('Getting filtered responses for form ', url);
@@ -26,9 +31,35 @@ app.get("/:formId/filteredResponses", async (req: Request, res: Response) => {
             }
         });
 
-        const data = response.data
+        const data = response.data;
 
-        res.json(data);
+        const filteredResponses: FillOutFormSubmissionResponse[] = data.responses.filter((submission) => {
+            // Iterate over filters
+            return filters.every((filter) => {
+                // Check if the question with matching id exists in the response
+                const question = submission.questions.find(q => q.id === filter.id);
+
+                if (question) {
+                    // Apply condition check based on the filter
+                    switch (filter.condition) {
+                        case "equals":
+                            return question.value == filter.value;
+                        case "does_not_equal":
+                            return question.value != filter.value;
+                        case "greater_than":
+                        case "less_than":
+                            return false
+                        default:
+                            return false;
+                    }
+                }
+
+                // If question with filter id not found, return false
+                return false;
+            });
+        });
+
+        res.json(filteredResponses);
     } catch (error) {
         console.table({ message: 'Unable to get filtered responses for a form ', formId, error })
         res.status(400).send('Unable to get filtered responses for this form')

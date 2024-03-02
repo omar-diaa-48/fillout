@@ -21,3 +21,11 @@ export interface FillOutFormSubmissionResponsesData {
     totalResponses: number;
     pageCount: number;
 }
+
+export type FillOutFormSubmissionFilterClauseType = {
+    id: string;
+    value: number | string;
+    condition: 'equals' | 'does_not_equal' | 'greater_than' | 'less_than';
+}
+
+export type ResponseFiltersType = FillOutFormSubmissionFilterClauseType[];
