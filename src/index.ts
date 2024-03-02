@@ -6,8 +6,9 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT;
 
-app.get("/", (req: Request, res: Response) => {
-    res.send("Express + TypeScript Server");
+app.get("/:formId/filteredResponses", (req: Request, res: Response) => {
+    console.log('Getting filtered responses for form ', req.params.formId);
+    res.json([]);
 });
 
 app.listen(port, () => {
