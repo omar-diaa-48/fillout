@@ -45,13 +45,16 @@ export const getFilteredResponses = (responses: FillOutFormSubmissionResponse[],
 
             if (question) {
                 // Apply condition check based on the filter, avoid strict data type validation in comparison
-                const valueType = !isNaN(parseFloat(question.value)) ? "number" : dayjs(question.value).isValid() ? "date" : "string"
+                const valueType =
+                    dayjs(question.value, 'YYYY-MM-DD').isValid() && dayjs(filter.value, 'YYYY-MM-DD').isValid() ? "date"
+                        : !isNaN(parseFloat(question.value)) && !isNaN(parseFloat(filter.value + '')) ? "number"
+                            : "string"
 
                 switch (filter.condition) {
 
                     case "equals":
                         if (valueType === "date") {
-                            return dayjs(question.value).isSame(filter.value)
+                            return dayjs(question.value, 'YYYY-MM-DD').isSame(dayjs(filter.value, 'YYYY-MM-DD'))
                         }
 
                         return question.value == filter.value;
@@ -68,9 +71,9 @@ export const getFilteredResponses = (responses: FillOutFormSubmissionResponse[],
                     case "greater_than":
                         switch (valueType) {
                             case "date":
-                                return dayjs(question.value).isAfter(filter.value)
+                                return dayjs(question.value, 'YYYY-MM-DD').isAfter(dayjs(filter.value, 'YYYY-MM-DD'))
                             case "number":
-                                return question.value > filter.value
+                                return parseFloat(question.value) > parseFloat(filter.value + '')
                             case "string":
                             default:
                                 return false
@@ -80,9 +83,9 @@ export const getFilteredResponses = (responses: FillOutFormSubmissionResponse[],
                     case "less_than":
                         switch (valueType) {
                             case "date":
-                                return dayjs(question.value).isBefore(filter.value)
+                                return dayjs(question.value, 'YYYY-MM-DD').isBefore(dayjs(filter.value, 'YYYY-MM-DD'))
                             case "number":
-                                return question.value < filter.value
+                                return parseFloat(question.value) < parseFloat(filter.value + '')
                             case "string":
                             default:
                                 return false
