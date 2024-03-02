@@ -12,10 +12,10 @@ const port = process.env.PORT;
 
 app.get("/:formId/filteredResponses", async (req: Request, res: Response) => {
     const formId = req.params.formId;
-    const query = qs.parse(req.query as any, { depth: 10, parseArrays: true, arrayLimit: Infinity, });
+    const query: any = qs.parse(req.query as any);
 
-    const [limit, _, params] = getParamsFromRequest(req.query)
-    const filters: ResponseFiltersType = query.filters ? JSON.parse(JSON.stringify(query.filters)) : [];
+    const [limit, _, params] = getParamsFromRequest(query)
+    const filters: ResponseFiltersType = query.filters ? JSON.parse(query.filters) : [];
 
     try {
         if (!formId) {
@@ -44,7 +44,7 @@ app.get("/:formId/filteredResponses", async (req: Request, res: Response) => {
         });
     } catch (error) {
         console.error(error)
-        console.table({ message: 'Unable to get filtered responses for a form ', formId, error })
+        console.table({ message: 'Unable to get filtered responses for form ', formId, error })
         res.status(400).send('Unable to get filtered responses for this form')
     }
 });
