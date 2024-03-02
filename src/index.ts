@@ -12,6 +12,13 @@ app.get("/:formId/filteredResponses", (req: Request, res: Response) => {
 });
 
 app.all('*', (req: Request, res: Response) => {
+    console.table({
+        type: 'trace',
+        message: 'Unavailable API request',
+        url: req.url,
+        body: req.body
+    })
+
     res.send('This API is unavailable at the moment')
 })
 
