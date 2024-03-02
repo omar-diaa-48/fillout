@@ -1,4 +1,5 @@
 import axios from "axios";
+import dayjs from "dayjs";
 import dotenv from "dotenv";
 import express, { Express, Request, Response } from "express";
 import { FillOutFormSubmissionResponse, FillOutFormSubmissionResponsesData, ResponseFiltersType } from "./interfaces";
@@ -37,20 +38,57 @@ app.get("/:formId/filteredResponses", async (req: Request, res: Response) => {
             // Iterate over filters
             return filters.every((filter) => {
                 // Check if the question with matching id exists in the response
-                const question = submission.questions.find(q => q.id === filter.id);
+                const question = submission.questions.find((q) => q.id === filter.id);
 
                 if (question) {
-                    // Apply condition check based on the filter
+                    // Apply condition check based on the filter, avoid strict data type validation in comparison
+                    const valueType = !isNaN(parseFloat(question.value)) ? "number" : dayjs(question.value).isValid() ? "date" : "string"
+
                     switch (filter.condition) {
+
                         case "equals":
+                            if (valueType === "date") {
+                                return dayjs(question.value).isSame(filter.value)
+                            }
+
                             return question.value == filter.value;
+
+
                         case "does_not_equal":
+                            if (valueType === "date") {
+                                return !dayjs(question.value).isSame(filter.value)
+                            }
+
                             return question.value != filter.value;
+
+
                         case "greater_than":
+                            switch (valueType) {
+                                case "date":
+                                    return dayjs(question.value).isAfter(filter.value)
+                                case "number":
+                                    return question.value > filter.value
+                                case "string":
+                                default:
+                                    return false
+                            }
+
+
                         case "less_than":
-                            return false
+                            switch (valueType) {
+                                case "date":
+                                    return dayjs(question.value).isBefore(filter.value)
+                                case "number":
+                                    return question.value < filter.value
+                                case "string":
+                                default:
+                                    return false
+                            }
+
+
                         default:
                             return false;
+
                     }
                 }
 
