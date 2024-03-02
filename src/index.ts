@@ -1,6 +1,7 @@
 import axios from "axios";
 import dotenv from "dotenv";
 import express, { Express, Request, Response } from "express";
+import qs from 'qs';
 import { FillOutFormSubmissionResponsesData, ResponseFiltersType } from "./interfaces";
 import { getFillOutUrl, getFilteredResponses, getParamsFromRequest } from "./utilities";
 
@@ -11,7 +12,7 @@ const port = process.env.PORT;
 
 app.get("/:formId/filteredResponses", async (req: Request, res: Response) => {
     const formId = req.params.formId;
-    const query = req.query;
+    const query = qs.parse(req.query as any, { depth: 10, parseArrays: true, arrayLimit: Infinity, });
 
     const [limit, _, params] = getParamsFromRequest(req.query)
     const filters: ResponseFiltersType = query.filters ? JSON.parse(JSON.stringify(query.filters)) : [];
