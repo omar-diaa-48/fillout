@@ -11,13 +11,7 @@ $ npm install
 
 ## Serve
 
-1. Through local development:
+Through local development:
 ```console
 $ npm run dev
-```
-
-2. Through a container:
-```console
-$ docker build --env-file ./.env -t fallout-api .
-$ docker run -p 3000:3000 fallout-api
 ```
