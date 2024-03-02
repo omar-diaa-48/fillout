@@ -11,6 +11,10 @@ app.get("/:formId/filteredResponses", (req: Request, res: Response) => {
     res.json([]);
 });
 
+app.all('*', (req: Request, res: Response) => {
+    res.send('This API is unavailable at the moment')
+})
+
 app.listen(port, () => {
     console.log(`[server]: Server is running at http://localhost:${port}`);
 });
