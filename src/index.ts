@@ -1,6 +1,7 @@
 import axios from "axios";
 import dotenv from "dotenv";
 import express, { Express, Request, Response } from "express";
+import { FillOutFormSubmissionResponsesData } from "./interfaces";
 import { getFillOutUrl } from "./utilities";
 
 dotenv.config();
@@ -19,15 +20,15 @@ app.get("/:formId/filteredResponses", async (req: Request, res: Response) => {
 
         console.log('Getting filtered responses for form ', url);
 
-        const response = await axios.get(url, {
+        const response = await axios.get<FillOutFormSubmissionResponsesData>(url, {
             headers: {
                 'Authorization': `Bearer ${process.env.FILL_OUT_API_KEY}`
             }
         });
 
-        console.log(response.data);
+        const data = response.data
 
-        res.json([]);
+        res.json(data);
     } catch (error) {
         console.table({ message: 'Unable to get filtered responses for a form ', formId, error })
         res.status(400).send('Unable to get filtered responses for this form')
